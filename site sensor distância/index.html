@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Radar Ultrassônico</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+    <h1>📡 Radar Ultrassônico</h1>
+
+    <button id="connect">🔌 Conectar Arduino</button>
+    <p id="status">Desconectado</p>
+
+    <div class="display">
+      <h2>Distância</h2>
+      <p id="distancia">-- cm</p>
+    </div>
+
+    <div class="barra-container">
+      <div id="barra"></div>
+    </div>
+
+    <div class="config">
+      <h3>Configuração</h3>
+      <label>Distância mínima:</label>
+      <input type="number" id="min" value="10">
+
+      <label>Distância máxima:</label>
+      <input type="number" id="max" value="100">
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: white;
+  text-align: center;
+}
+
+.app {
+  margin-top: 40px;
+}
+
+button {
+  padding: 12px 25px;
+  font-size: 18px;
+  background: #22c55e;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+#status {
+  margin-top: 10px;
+  color: #94a3b8;
+}
+
+.display {
+  margin-top: 30px;
+}
+
+#distancia {
+  font-size: 60px;
+  margin: 10px 0;
+}
+
+.barra-container {
+  width: 80%;
+  height: 30px;
+  background: #1e293b;
+  margin: 20px auto;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#barra {
+  height: 100%;
+  width: 0%;
+  background: lime;
+  transition: 0.3s;
+}
+
+.config {
+  margin-top: 30px;
+}
+
+input {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 8px;
+  border: none;
+  width: 80px;
+}
