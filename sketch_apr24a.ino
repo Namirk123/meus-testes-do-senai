@@ -3,7 +3,7 @@
 #define buzzer 8
 
 long duracao;
-int distancia;
+float distancia;
 
 void setup() {
   pinMode(trigPin, OUTPUT);
@@ -24,7 +24,8 @@ void loop() {
   duracao = pulseIn(echoPin, HIGH);
   distancia = duracao * 0.034 / 2;
 
-  Serial.print("Distancia: ");
+  // Envia no formato esperado pelo site
+  Serial.print("DIST:");
   Serial.println(distancia);
 
   // Se algo estiver perto, apita
