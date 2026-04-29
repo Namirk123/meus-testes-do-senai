@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radar Ultrassônico</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060a10;
+      --panel: #0b1120;
+      --border: #1a2a40;
+      --green: #00ff88;
+      --amber: #ffb300;
+      --red: #ff3b3b;
+      --cyan: #00d4ff;
+      --dim: #2a3d55;
+      --text: #c8dff0;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px 60px;
+      overflow-x: hidden;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pulse-icon {
+      width: 36px;
+      height: 36px;
+      position: relative;
+    }
+    .pulse-icon svg { width: 100%; height: 100%; }
+    .pulse-ring {
+      animation: pulse-ring 2s ease-out infinite;
+      transform-origin: center;
+    }
+    @keyframes pulse-ring {
+      0%   { opacity: 0.9; transform: scale(0.6); }
+      70%  { opacity: 0.1; transform: scale(1.3); }
+      100% { opacity: 0; transform: scale(1.4); }
+    }
+
+    h1 {
+      font-family: var(--sans);
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0,212,255,0.4);
+    }
+
+    .subtitle {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+
+    /* === MAIN GRID === */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 16px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.3;
+    }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      color: var(--dim);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* === RADAR DISPLAY === */
+    .radar-panel {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .radar-canvas-wrap {
+      position: relative;
+      width: 260px;
+      height: 260px;
+    }
+
+    canvas#radar {
+      display: block;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      box-shadow: 0 0 40px rgba(0,255,136,0.07), inset 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    .dist-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .dist-big {
+      font-family: var(--mono);
+      font-size: 2.8rem;
+      font-weight: 400;
+      color: var(--green);
+      text-shadow: 0 0 24px rgba(0,255,136,0.6);
+      line-height: 1;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    .dist-big .unit { font-size: 1rem; opacity: 0.6; margin-left: 4px; }
+
+    /* === BARRA === */
+    .bar-section { grid-column: 1 / -1; }
+
+    .bar-track {
+      width: 100%;
+      height: 22px;
+      background: #080e18;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    #barra {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      background: var(--green);
+      box-shadow: 0 0 12px currentColor;
+      transition: width 0.25s ease, background 0.3s;
+      position: relative;
+    }
+    #barra::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 6px; right: 6px;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 99px;
+    }
+
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--dim);
+    }
+
+    .bar-pct {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--cyan);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    /* === HISTÓRICO === */
+    .history-panel { grid-column: 1 / -1; }
+
+    .sparkline-wrap {
+      width: 100%;
+      height: 80px;
+      position: relative;
+    }
+    canvas#spark {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* === CONFIG === */
+    .config-panel {}
+
+    .config-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .field input {
+      background: #080e18;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--cyan);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      padding: 6px 10px;
+      width: 80px;
+      text-align: right;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--cyan); }
+    .field .unit-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--dim);
+      width: 24px;
+    }
+
+    /* === STATUS & CONNECT === */
+    .connect-panel {}
+
+    #connect {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 2px solid var(--green);
+      border-radius: 10px;
+      color: var(--green);
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    #connect:hover {
+      background: rgba(0,255,136,0.1);
+      box-shadow: 0 0 20px rgba(0,255,136,0.3);
+    }
+    #connect:active { transform: scale(0.97); }
+    #connect.connected {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    #connect.error {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--dim);
+      transition: background 0.3s, box-shadow 0.3s;
+      flex-shrink: 0;
+    }
+    .dot.on  { background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 1.4s ease-in-out infinite; }
+    .dot.err { background: var(--red); box-shadow: 0 0 8px var(--red); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    #status {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--dim);
+    }
+
+    /* Baud info */
+    .baud-note {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--dim);
+      margin-top: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* === ALERT BANNER === */
+    #alert-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--red);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-weight: 700;
+      letter-spacing: 3px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      animation: flash 0.5s ease-in-out infinite alternate;
+      z-index: 200;
+    }
+    @keyframes flash { from{opacity:1} to{opacity:0.4} }
+
+    /* === COMPAT WARNING === */
+    #compat-warn {
+      display: none;
+      background: #1a0a00;
+      border: 1px solid var(--amber);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 0.85rem;
+      color: var(--amber);
+      line-height: 1.6;
+      max-width: 860px;
+      width: 100%;
+      margin-bottom: 20px;
+      font-family: var(--mono);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="compat-warn">⚠ Web Serial API não suportada. Use o Google Chrome ou Microsoft Edge (versão 89+) e acesse via <strong>http://</strong> ou <strong>https://</strong> (não por file://).</div>
+
+  <header>
+    <div class="title-row">
+      <div class="pulse-icon">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle class="pulse-ring" cx="18" cy="18" r="14" stroke="#00d4ff" stroke-width="2"/>
+          <circle cx="18" cy="18" r="6" fill="#00d4ff" opacity="0.9"/>
+        </svg>
+      </div>
+      <h1>Radar Ultrassônico</h1>
+    </div>
+    <div class="subtitle">Arduino · HC-SR04 · Web Serial API</div>
+  </header>
+
+  <div class="grid">
+
+    <!-- Radar circular + distância -->
+    <div class="panel radar-panel">
+      <div class="panel-label">// leitura ao vivo</div>
+      <div class="radar-canvas-wrap">
+        <canvas id="radar" width="260" height="260"></canvas>
+        <div class="dist-overlay">
+          <div class="dist-big" id="distancia">--<span class="unit">cm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de proximidade -->
+    <div class="panel bar-section">
+      <div class="panel-label">// proximidade</div>
+      <div class="bar-track">
+        <div id="barra"></div>
+      </div>
+      <div class="bar-labels">
+        <span id="lbl-min">min</span>
+        <span id="lbl-max">max</span>
+      </div>
+      <div class="bar-pct" id="pct-label">0%</div>
+    </div>
+
+    <!-- Histórico sparkline -->
+    <div class="panel history-panel">
+      <div class="panel-label">// histórico (últimas 60 leituras)</div>
+      <div class="sparkline-wrap">
+        <canvas id="spark"></canvas>
+      </div>
+    </div>
+
+    <!-- Configuração -->
+    <div class="panel config-panel">
+      <div class="panel-label">// configuração</div>
+      <div class="config-row">
+        <div class="field">
+          <label>Dist. mínima</label>
+          <input type="number" id="min" value="10">
+          <span class="unit-tag">cm</span>
+        </div>
+        <div class="field">
+          <label>Dist. máxima</label>
+          <input type="number" id="max" value="100">
+          <span class="unit-tag">cm</span>
+        </div>
+        <div class="field">
+          <label>Alerta abaixo de</label>
+          <input type="number" id="alert-thresh" value="20">
+          <span class="unit-tag">cm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conexão -->
+    <div class="panel connect-panel">
+      <div class="panel-label">// conexão serial</div>
+      <button id="connect">⚡ Conectar Arduino</button>
+      <div class="status-row">
+        <div class="dot" id="dot"></div>
+        <span id="status">Aguardando conexão…</span>
+      </div>
+      <div class="baud-note">BAUD: 9600 · TRIG: D9 · ECHO: D10 · BUZ: D8</div>
+    </div>
+
+  </div>
+
+  <div id="alert-banner">⚠ OBJETO PRÓXIMO</div>
+
+  <script>
+    // ── Referências ──────────────────────────────────────────────
+    const minInput    = document.getElementById("min");
+    const maxInput    = document.getElementById("max");
+    const alertThresh = document.getElementById("alert-thresh");
+    const distEl      = document.getElementById("distancia");
+    const barEl       = document.getElementById("barra");
+    const pctLabel    = document.getElementById("pct-label");
+    const lblMin      = document.getElementById("lbl-min");
+    const lblMax      = document.getElementById("lbl-max");
+    const statusEl    = document.getElementById("status");
+    const dotEl       = document.getElementById("dot");
+    const connectBtn  = document.getElementById("connect");
+    const alertBanner = document.getElementById("alert-banner");
+    const radarCanvas = document.getElementById("radar");
+    const sparkCanvas = document.getElementById("spark");
+    const rCtx        = radarCanvas.getContext("2d");
+    const sCtx        = sparkCanvas.getContext("2d");
+
+    // ── Estado ───────────────────────────────────────────────────
+    let port, reader;
+    let connected      = false;
+    let buffer         = "";
+    let lastDist       = null;
+    let sweepAngle     = 0;
+    let history        = [];
+    const MAX_HIST     = 60;
+    let alertaAtivo    = false;   // controla se já estamos dentro da zona de alerta
+
+    // ── Web Serial check ─────────────────────────────────────────
+    if (!("serial" in navigator)) {
+      document.getElementById("compat-warn").style.display = "block";
+      connectBtn.disabled = true;
+      connectBtn.style.opacity = "0.4";
+    }
+
+    // ── Conexão ──────────────────────────────────────────────────
+    connectBtn.addEventListener("click", async () => {
+      if (connected) { disconnect(); return; }
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        connected = true;
+        connectBtn.textContent = "✖ Desconectar";
+        connectBtn.classList.add("connected");
+        dotEl.className = "dot on";
+        statusEl.textContent = "Conectado — lendo dados…";
+
+        readLoop();
+      } catch (e) {
+        dotEl.className = "dot err";
+        connectBtn.classList.add("error");
+        statusEl.textContent = "Erro: " + (e.message || e);
+        console.error(e);
+      }
+    });
+
+    async function readLoop() {
+      reader = port.readable.getReader();
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += new TextDecoder().decode(value);
+          let nl;
+          while ((nl = buffer.indexOf("\n")) !== -1) {
+            const line = buffer.slice(0, nl).trim();
+            buffer = buffer.slice(nl + 1);
+            parseLine(line);
+          }
+        }
+      } catch (e) {
+        if (connected) {
+          dotEl.className = "dot err";
+          statusEl.textContent = "Conexão interrompida.";
+          connected = false;
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    }
+
+    async function disconnect() {
+      connected    = false;
+      alertaAtivo  = false;
+      connectBtn.textContent = "⚡ Conectar Arduino";
+      connectBtn.classList.remove("connected", "error");
+      dotEl.className = "dot";
+      statusEl.textContent = "Desconectado.";
+      alertBanner.style.display = "none";
+      try { await reader?.cancel(); } catch {}
+      try { await port?.close(); } catch {}
+    }
+
+    // ── Parse de linha ───────────────────────────────────────────
+    function parseLine(line) {
+      if (line.startsWith("DIST:")) {
+        const v = parseFloat(line.replace("DIST:", "").trim());
+        if (!isNaN(v) && v >= 0 && v < 600) {
+          lastDist = v;
+          history.push(v);
+          if (history.length > MAX_HIST) history.shift();
+          updateUI(v);
+        }
+      }
+    }
+
+    // ── Atualização de UI ────────────────────────────────────────
+    function updateUI(d) {
+      const min = parseFloat(minInput.value)  || 10;
+      const max = parseFloat(maxInput.value)  || 100;
+      const thr = parseFloat(alertThresh.value) || 20;
+
+      // Texto da distância
+      distEl.innerHTML = d.toFixed(1) + '<span class="unit">cm</span>';
+
+      // Cor pelo estado
+      let color;
+      if (d <= thr) {
+        color = getComputedStyle(document.documentElement).getPropertyValue('--red').trim();
+      } else if (d < (min + max) / 2) {
+        color = getComputedStyle(document.documentElement).getPropertyValue('--amber').trim();
+      } else {
+        color = getComputedStyle(document.documentElement).getPropertyValue('--green').trim();
+      }
+      distEl.style.color = color;
+      distEl.style.textShadow = `0 0 24px ${color}80`;
+
+      // Barra
+      let pct = ((d - min) / (max - min)) * 100;
+      pct = Math.max(0, Math.min(100, pct));
+      barEl.style.width = pct + "%";
+      barEl.style.background = color;
+      pctLabel.textContent = pct.toFixed(0) + "%";
+      lblMin.textContent = min + " cm";
+      lblMax.textContent = max + " cm";
+
+      // Alerta — beep APENAS na entrada na zona (transição false → true)
+      if (d <= thr) {
+        alertBanner.style.display = "block";
+        if (!alertaAtivo) {
+          alertaAtivo = true;   // marca que já estamos na zona — não repete o som
+          playBeep();
+        }
+      } else {
+        alertBanner.style.display = "none";
+        alertaAtivo = false;    // saiu da zona — libera para soar novamente na próxima entrada
+      }
+    }
+
+    // ── Audio beep ───────────────────────────────────────────────
+    let audioCtx;
+    function playBeep() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch {}
+    }
+
+    // ── Radar canvas (animação de varredura) ─────────────────────
+    function drawRadar() {
+      const W = radarCanvas.width, H = radarCanvas.height;
+      const cx = W / 2, cy = H / 2, R = W / 2 - 2;
+
+      rCtx.clearRect(0, 0, W, H);
+
+      // Fundo
+      rCtx.fillStyle = "#060a10";
+      rCtx.beginPath(); rCtx.arc(cx, cy, R, 0, Math.PI * 2); rCtx.fill();
+
+      // Círculos de grade
+      for (let i = 1; i <= 4; i++) {
+        const r = (R * i) / 4;
+        rCtx.beginPath(); rCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        rCtx.strokeStyle = "rgba(0,212,255,0.12)";
+        rCtx.lineWidth = 1;
+        rCtx.stroke();
+      }
+
+      // Cruz
+      rCtx.strokeStyle = "rgba(0,212,255,0.1)";
+      rCtx.lineWidth = 1;
+      rCtx.beginPath(); rCtx.moveTo(cx - R, cy); rCtx.lineTo(cx + R, cy); rCtx.stroke();
+      rCtx.beginPath(); rCtx.moveTo(cx, cy - R); rCtx.lineTo(cx, cy + R); rCtx.stroke();
+
+      // Varredura (sweep)
+      if (connected) {
+        const grad = rCtx.createConicalGradient
+          ? null  // fallback abaixo
+          : null;
+
+        // Glow de varredura usando arco
+        rCtx.save();
+        rCtx.translate(cx, cy);
+        rCtx.rotate(sweepAngle);
+        const sweepGrad = rCtx.createLinearGradient(0, 0, R, 0);
+        sweepGrad.addColorStop(0, "rgba(0,255,136,0.0)");
+        sweepGrad.addColorStop(0.7, "rgba(0,255,136,0.08)");
+        sweepGrad.addColorStop(1, "rgba(0,255,136,0.0)");
+        rCtx.beginPath();
+        rCtx.moveTo(0, 0);
+        rCtx.arc(0, 0, R, -0.5, 0.5);
+        rCtx.closePath();
+        rCtx.fillStyle = sweepGrad;
+        rCtx.fill();
+
+        // Linha de varredura
+        rCtx.beginPath(); rCtx.moveTo(0, 0); rCtx.lineTo(R, 0);
+        rCtx.strokeStyle = "rgba(0,255,136,0.8)"; rCtx.lineWidth = 1.5; rCtx.stroke();
+        rCtx.restore();
+
+        sweepAngle += 0.03;
+      }
+
+      // Ponto de distância
+      if (lastDist !== null) {
+        const min = parseFloat(minInput.value)  || 10;
+        const max = parseFloat(maxInput.value)  || 100;
+        const pct  = Math.max(0, Math.min(1, (lastDist - min) / (max - min)));
+        const pr   = pct * R;
+
+        const px = cx + Math.cos(sweepAngle - 0.05) * pr;
+        const py = cy + Math.sin(sweepAngle - 0.05) * pr;
+
+        const thr = parseFloat(alertThresh.value) || 20;
+        const dotColor = lastDist <= thr ? "#ff3b3b" :
+                         lastDist < (min + max) / 2 ? "#ffb300" : "#00ff88";
+
+        rCtx.beginPath(); rCtx.arc(px, py, 5, 0, Math.PI * 2);
+        rCtx.fillStyle = dotColor;
+        rCtx.shadowBlur = 14; rCtx.shadowColor = dotColor;
+        rCtx.fill();
+        rCtx.shadowBlur = 0;
+      }
+
+      requestAnimationFrame(drawRadar);
+    }
+    drawRadar();
+
+    // ── Sparkline ─────────────────────────────────────────────────
+    function drawSpark() {
+      const W = sparkCanvas.offsetWidth || 400;
+      const H = sparkCanvas.offsetHeight || 80;
+      sparkCanvas.width  = W;
+      sparkCanvas.height = H;
+
+      sCtx.clearRect(0, 0, W, H);
+
+      if (history.length < 2) {
+        requestAnimationFrame(drawSpark);
+        return;
+      }
+
+      const min   = Math.min(...history);
+      const max   = Math.max(...history) || 1;
+      const range = max - min || 1;
+      const pad   = 8;
+
+      // Grade horizontal
+      sCtx.strokeStyle = "rgba(0,212,255,0.07)";
+      sCtx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad + ((H - pad * 2) * i) / 4;
+        sCtx.beginPath(); sCtx.moveTo(0, y); sCtx.lineTo(W, y); sCtx.stroke();
+      }
+
+      // Linha
+      sCtx.beginPath();
+      history.forEach((v, i) => {
+        const x = (i / (MAX_HIST - 1)) * W;
+        const y = H - pad - ((v - min) / range) * (H - pad * 2);
+        i === 0 ? sCtx.moveTo(x, y) : sCtx.lineTo(x, y);
+      });
+
+      sCtx.strokeStyle = "#00d4ff";
+      sCtx.lineWidth = 2;
+      sCtx.shadowBlur = 6;
+      sCtx.shadowColor = "#00d4ff";
+      sCtx.stroke();
+      sCtx.shadowBlur = 0;
+
+      // Área preenchida
+      sCtx.lineTo(W, H); sCtx.lineTo(0, H); sCtx.closePath();
+      const fillGrad = sCtx.createLinearGradient(0, 0, 0, H);
+      fillGrad.addColorStop(0, "rgba(0,212,255,0.15)");
+      fillGrad.addColorStop(1, "rgba(0,212,255,0)");
+      sCtx.fillStyle = fillGrad;
+      sCtx.fill();
+
+      requestAnimationFrame(drawSpark);
+    }
+    drawSpark();
+  </script>
+</body>
+</html>
