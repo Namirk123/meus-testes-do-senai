@@ -1,0 +1,489 @@
+/* ===== O MELHOR SITE DO MUNDO CSS ===== */
+/* feito por eu mesmo em 2003 */
+
+body {
+    background-color: #00FF00;
+    background-image: url("https://www.toptal.com/designers/subtlepatterns/uploads/double-bubble-outline.png");
+    font-family: "Comic Sans MS", cursive;
+    margin: 0;
+    padding: 0;
+    cursor: url("https://cur.cursors-4u.net/symbols/sym-1/sym19.cur"), auto;
+    overflow-x: scroll;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* HEADER INCRIVEL */
+#header-principal {
+    background: linear-gradient(45deg, #FF0000, #FFFF00, #00FF00, #0000FF, #FF00FF);
+    background-size: 400% 400%;
+    animation: arco-iris 0.5s infinite;
+    text-align: center;
+    padding: 5px;
+    border: 8px ridge #FF0000;
+    border-bottom: 15px dotted #0000FF;
+}
+
+@keyframes arco-iris {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#header-principal h1 {
+    font-size: 52px;
+    color: #FF00FF;
+    text-shadow: 3px 3px 0 #000, -2px -2px 0 #FF0000, 5px 5px 5px #FFFF00;
+    font-family: "Impact", sans-serif;
+    letter-spacing: -2px;
+    margin: 0;
+    animation: pisca 0.4s step-end infinite;
+}
+
+@keyframes pisca {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+/* MARQUEE TOP */
+.marquee-top {
+    background-color: #FF0000;
+    color: #FFFF00;
+    font-size: 22px;
+    font-weight: 900;
+    padding: 4px 0;
+    border-top: 4px solid #00FF00;
+    border-bottom: 4px solid #0000FF;
+}
+
+/* NAVEGAÇÃO HORRIVEL */
+nav {
+    background-color: #0000FF;
+    padding: 0;
+    border: 5px groove #FF00FF;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+nav ul li a {
+    color: #00FF00;
+    text-decoration: underline overline;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: "Times New Roman", serif;
+    background-color: #FF00FF;
+    padding: 2px 6px;
+    border: 3px outset #FFFF00;
+    display: inline-block;
+}
+
+nav ul li a:hover {
+    background-color: #FFFF00;
+    color: #FF0000;
+    font-size: 22px;
+}
+
+nav ul li:nth-child(odd) a  { color: #FF0000; }
+nav ul li:nth-child(even) a { color: #00FFFF; }
+
+/* LAYOUT PRINCIPAL - tabela como deus mandou */
+#layout-principal {
+    display: grid;
+    grid-template-columns: 180px 1fr 160px;
+    gap: 0;
+    border: 6px double #FF0000;
+}
+
+/* SIDEBAR ESQUERDA */
+#sidebar-esquerda {
+    background-color: #FFFF00;
+    border-right: 8px ridge #FF0000;
+    padding: 4px;
+    min-height: 800px;
+}
+
+#sidebar-esquerda h3 {
+    background-color: #FF0000;
+    color: #FFFF00;
+    font-size: 14px;
+    padding: 2px;
+    text-align: center;
+    border: 2px solid #000;
+    margin: 2px 0;
+}
+
+#sidebar-esquerda ul {
+    list-style: square;
+    padding-left: 10px;
+    margin: 2px 0;
+}
+
+#sidebar-esquerda ul li {
+    font-size: 11px;
+    line-height: 1.1;
+}
+
+#sidebar-esquerda ul li a {
+    color: #0000FF;
+    font-size: 10px;
+}
+
+/* CONTEUDO CENTRAL */
+#conteudo-central {
+    background-color: #FFFFFF;
+    padding: 3px;
+}
+
+/* SECOES DE PRODUTO CAÓTICAS */
+.secao-produto {
+    border: 4px dashed #FF0000;
+    margin: 4px;
+    padding: 4px;
+    background-color: #FFE4E1;
+    float: left;
+    width: 23%;
+    min-height: 120px;
+    text-align: center;
+    overflow: visible;
+}
+
+.secao-produto:nth-child(2) {
+    background-color: #E0FFFF;
+    border: 4px dotted #0000FF;
+    transform: rotate(-1.5deg);
+    margin-top: 20px;
+}
+
+.secao-produto:nth-child(3) {
+    background-color: #F0FFF0;
+    border: 4px solid #00FF00;
+    transform: rotate(1deg);
+}
+
+.secao-produto:nth-child(4) {
+    background-color: #FFF8DC;
+    border: 6px ridge #FF00FF;
+}
+
+.secao-produto img {
+    width: 90%;
+    height: 70px;
+    object-fit: cover;
+    border: 3px solid #000;
+}
+
+.secao-produto h4 {
+    font-size: 10px;
+    margin: 2px 0;
+    color: #FF0000;
+    font-family: "Impact";
+}
+
+.preco {
+    color: #FF0000;
+    font-size: 20px;
+    font-weight: 900;
+    font-family: "Comic Sans MS";
+    text-shadow: 1px 1px 0 #000;
+    animation: pisca-preco 1s step-end infinite;
+}
+
+@keyframes pisca-preco {
+    0%, 49%  { color: #FF0000; }
+    50%, 100% { color: #0000FF; }
+}
+
+.botao-comprar {
+    background: linear-gradient(#FF0000, #FF6600);
+    color: #FFFF00;
+    font-size: 13px;
+    font-weight: 900;
+    border: 4px outset #FF9900;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-family: "Comic Sans MS";
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.botao-comprar:hover {
+    background: linear-gradient(#00FF00, #FFFF00);
+    color: #FF0000;
+    font-size: 15px;
+}
+
+/* LIMPAR FLOATS */
+.clearfix::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* SIDEBAR DIREITA */
+#sidebar-direita {
+    background-color: #FF00FF;
+    border-left: 8px ridge #0000FF;
+    padding: 4px;
+}
+
+#sidebar-direita h3 {
+    background-color: #0000FF;
+    color: #FFFF00;
+    font-size: 12px;
+    text-align: center;
+    border: 2px solid #FF0000;
+    margin: 2px 0;
+    padding: 2px;
+}
+
+/* BANNER PISCANDO */
+.banner-oferta {
+    background-color: #FF0000;
+    color: #FFFF00;
+    border: 5px solid #FFFF00;
+    text-align: center;
+    padding: 6px;
+    margin: 4px 0;
+    font-size: 13px;
+    font-weight: 900;
+    animation: pisca-banner 0.5s step-end infinite;
+}
+
+@keyframes pisca-banner {
+    0%, 100% { background-color: #FF0000; color: #FFFF00; }
+    50%       { background-color: #FFFF00; color: #FF0000; }
+}
+
+/* SECAO DE NOTICIAS HORRIVEL */
+#noticias {
+    background-color: #E6E6FA;
+    border: 6px double #0000FF;
+    margin: 4px;
+    padding: 6px;
+    clear: both;
+}
+
+#noticias h2 {
+    color: #FF0000;
+    font-size: 28px;
+    text-decoration: underline;
+    text-transform: uppercase;
+    font-family: "Times New Roman";
+    margin: 0 0 4px 0;
+    text-shadow: 2px 2px 0 #0000FF;
+}
+
+.noticia-item {
+    border-bottom: 3px dashed #FF00FF;
+    padding: 4px 0;
+    font-size: 11px;
+}
+
+.noticia-item span {
+    color: #FF0000;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* CONTADOR VISITAS */
+#contador {
+    background-color: #000000;
+    color: #00FF00;
+    font-family: "Courier New", monospace;
+    font-size: 24px;
+    text-align: center;
+    border: 4px solid #00FF00;
+    padding: 8px;
+    margin: 4px;
+    letter-spacing: 6px;
+}
+
+/* RODAPÉ CAÓTICO */
+footer {
+    background-color: #000000;
+    color: #FFFF00;
+    text-align: center;
+    padding: 5px;
+    border-top: 8px ridge #FF0000;
+    font-size: 9px;
+}
+
+footer a { color: #00FF00; }
+footer p { margin: 2px 0; }
+
+/* POPUP MODAL HORRIVEL */
+#popup-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#popup-box {
+    background: linear-gradient(135deg, #FFFF00, #FF0000, #00FF00);
+    border: 10px ridge #0000FF;
+    padding: 20px;
+    max-width: 400px;
+    text-align: center;
+    animation: balanca 0.3s infinite alternate;
+    position: relative;
+}
+
+@keyframes balanca {
+    0%   { transform: rotate(-2deg) scale(1); }
+    100% { transform: rotate(2deg) scale(1.02); }
+}
+
+#popup-box h2 {
+    font-size: 30px;
+    color: #0000FF;
+    text-shadow: 2px 2px 0 #FF0000;
+    font-family: Impact;
+    animation: pisca 0.5s step-end infinite;
+}
+
+#popup-box p {
+    font-size: 14px;
+    color: #000;
+    font-weight: bold;
+    background: #FFFFFF;
+    border: 3px dashed #FF0000;
+    padding: 5px;
+}
+
+#btn-fechar-popup {
+    background: #0000FF;
+    color: #FFFF00;
+    border: 4px outset #00FF00;
+    padding: 6px 20px;
+    font-size: 16px;
+    font-family: "Comic Sans MS";
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 8px;
+    display: block;
+    width: 100%;
+}
+
+/* IMAGENS ALEATORIAS FLUTUANDO */
+.img-flutuante {
+    position: fixed;
+    animation: flutua 3s ease-in-out infinite;
+    z-index: 100;
+    pointer-events: none;
+    font-size: 40px;
+}
+
+.img-flutuante:nth-child(1) { top: 20%; left: 5%;  animation-delay: 0s; }
+.img-flutuante:nth-child(2) { top: 60%; right: 3%; animation-delay: 0.5s; }
+.img-flutuante:nth-child(3) { top: 40%; left: 50%; animation-delay: 1s; }
+
+@keyframes flutua {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%       { transform: translateY(-20px) rotate(15deg); }
+}
+
+/* TEXTO IRRITANTE */
+.texto-girando {
+    animation: gira 4s linear infinite;
+    display: inline-block;
+    color: #FF0000;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+@keyframes gira {
+    0%   { transform: rotateY(0deg); }
+    50%  { transform: rotateY(180deg); color: #0000FF; }
+    100% { transform: rotateY(360deg); }
+}
+
+/* TOOLTIPS GIGANTES */
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    background: #FF0000;
+    color: #FFFF00;
+    font-size: 18px;
+    padding: 10px;
+    border: 5px solid #0000FF;
+    z-index: 999;
+    font-family: "Comic Sans MS";
+    white-space: normal;
+    max-width: 300px;
+    animation: pisca 0.3s step-end infinite;
+}
+
+/* SCROLLBAR HORRIVEL */
+::-webkit-scrollbar { width: 20px; height: 20px; }
+::-webkit-scrollbar-track { background: #00FF00; }
+::-webkit-scrollbar-thumb { background: linear-gradient(#FF0000, #0000FF, #FF00FF); border: 3px solid #FFFF00; }
+
+/* TABELA DE PREÇOS CONFUSA */
+.tabela-precos {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px;
+    margin: 6px 0;
+    font-size: 10px;
+}
+
+.tabela-precos th {
+    background: #FF0000;
+    color: #FFFF00;
+    border: 3px solid #0000FF;
+    padding: 3px;
+    font-family: "Comic Sans MS";
+    font-size: 12px;
+}
+
+.tabela-precos td {
+    border: 2px dashed #FF00FF;
+    padding: 2px;
+    background: #FFFACD;
+}
+
+.tabela-precos tr:nth-child(odd) td   { background: #E0FFFF; }
+.tabela-precos tr:nth-child(even) td  { background: #FFE4E1; }
+
+/* LINKS VISITED QUE MUDAM DE COR ALEATORIAMENTE */
+a:visited { color: #FF6600; text-decoration: line-through; }
+a:active  { font-size: 200%; }
+
+/* MEDIA QUERY QUE NAO FAZ NADA UTIL */
+@media (max-width: 800px) {
+    body { font-size: 8px; }
+    #header-principal h1 { font-size: 60px; }
+}
+
+/* COISAS ALEATÓRIAS */
+.destaque-super-importante {
+    background: repeating-linear-gradient(
+        45deg,
+        #FF0000 0px, #FF0000 10px,
+        #FFFF00 10px, #FFFF00 20px
+    );
+    color: #000;
+    font-size: 16px;
+    font-weight: 900;
+    padding: 5px;
+    text-align: center;
+    margin: 4px 0;
+    border: 5px solid #000;
+}
+
+/* FIM DO CSS INCRIVEL */
